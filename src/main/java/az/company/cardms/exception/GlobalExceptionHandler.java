@@ -58,27 +58,11 @@ public class GlobalExceptionHandler extends DefaultErrorAttributes {
         attributes.put(HttpResponseConstants.ERROR_KEY, "CONSTRAINT_VIOLATION");
         attributes.put(HttpResponseConstants.PATH, ((ServletWebRequest) request).getRequest().getRequestURL());
 
-//        if(ex instanceof DataIntegrityViolationException){
-//            if(ex.getCause().getCause() instanceof PSQLException psqlException){
-//                attributes.put(HttpResponseConstants.MESSAGE, getMessageForViolationError(psqlException.getSQLState()));
-//            }
-//        }
+
 
         return MessageResponse.response(ex.getMessage(), null, new ResponseEntity<>(attributes, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 
-    private String getMessageForViolationError(String errorCode) {
-
-        Map<String, String> messages =
-                Map.ofEntries(
-                        Map.entry(ErrorsFinal.UNIQUE_CONSTRAINT.getKey(), ErrorsFinal.UNIQUE_CONSTRAINT.getMessage()),
-                        Map.entry(ErrorsFinal.FK_CONSTRAINT.getKey(), ErrorsFinal.FK_CONSTRAINT.getMessage()),
-                        Map.entry(ErrorsFinal.NOT_EMPTY_CONSTRAINT.getKey(), ErrorsFinal.NOT_EMPTY_CONSTRAINT.getMessage()),
-                        Map.entry(ErrorsFinal.CHECK_VIOLATION.getKey(), ErrorsFinal.CHECK_VIOLATION.getMessage())
-                );
-
-        return messages.getOrDefault(errorCode, "message not specified for this constraint violation error");
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMANVE(MethodArgumentNotValidException ex, WebRequest request) {
@@ -87,8 +71,6 @@ public class GlobalExceptionHandler extends DefaultErrorAttributes {
                 .stream()
                 .map(error -> new ConstraintsViolationError(error.getField(), error.getDefaultMessage()))
                 .collect(Collectors.toList());
-//        String localizedMessage = messageSource.getMessage(ex.getClass().getName().concat(".message"),
-//                new Object[]{}, LocaleContextHolder.getLocale());
         log.error("MethodArgumentNotValidException Exception Handler exception -> {}", ex.getMessage());
         return MessageResponse.response("daxil edilən məlumatlar yanlışdır"/*getLocdMesStatus("404.message")*/, null, ofType(request, HttpStatus.BAD_REQUEST, "daxil edilən məlumatlar yanlışdır", null, validationErrors), HttpStatus.BAD_REQUEST);
     }
@@ -111,20 +93,6 @@ public class GlobalExceptionHandler extends DefaultErrorAttributes {
         attributes.put(HttpResponseConstants.PATH, ((ServletWebRequest) request).getRequest().getRequestURI());
         return new ResponseEntity<>(attributes, status);
     }
-
-//    @ExceptionHandler(SftpException.class)
-//    public ResponseEntity<?> handleGeneralException(SftpException ex, WebRequest request) {
-//        log.error("General Exception handler exception -> {}", ex.getMessage());
-//        return MessageResponse.response(ErrorsFinal.INTERNAL_SERVER_ERROR.getMessage(), null, ofType(request, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()/*ex.getLocalizedMessage()*/,
-//                ErrorsFinal.INTERNAL_SERVER_ERROR.getMessage(), Collections.EMPTY_LIST), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
-//
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<?> handleGeneralException(Exception ex, WebRequest request) {
-//        log.error("General Exception handler exception -> {}", ex.getMessage());
-//        return MessageResponse.response(ErrorsFinal.INTERNAL_SERVER_ERROR.getMessage(), null, ofType(request, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()/*ex.getLocalizedMessage()*/,
-//                ErrorsFinal.INTERNAL_SERVER_ERROR.getMessage(), Collections.EMPTY_LIST), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
 
 
 }
